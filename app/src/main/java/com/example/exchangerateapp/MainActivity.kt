@@ -20,6 +20,7 @@ import java.util.concurrent.TimeUnit
 class MainActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: ExchangeRateAdapter
+    private var lastUpdateDate: String = "" // Variable to store the last update date
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,7 +42,7 @@ class MainActivity : AppCompatActivity() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val apiKey = "b3aca349d3227803e2014759"
-                val baseCurrency = "USD"
+                val baseCurrency = "MXN"
 
                 Log.d("MainActivity", "Before API call")
                 val response = RetrofitClient.api.getLatestRates(apiKey, baseCurrency)
@@ -62,8 +63,10 @@ class MainActivity : AppCompatActivity() {
                         }
                         Log.d("MainActivity", "Exchange rate list size: ${exchangeRateList.size}")
 
+                        lastUpdateDate = exchangeRatesResponse.timeLastUpdateUtc ?: "N/A" // Store the update date
+
                         withContext(Dispatchers.Main) {
-                            adapter = ExchangeRateAdapter(exchangeRateList)
+                            adapter = ExchangeRateAdapter(exchangeRateList, lastUpdateDate) // **PASS lastUpdateDate HERE!**
                             recyclerView.adapter = adapter
                             Log.d("MainActivity", "Adapter updated on UI thread")
                         }
